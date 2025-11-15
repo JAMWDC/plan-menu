@@ -1,0 +1,54 @@
+.app {
+  font-family: system-ui, sans-serif;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+header, footer {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  color: #2563eb;
+}
+
+section {
+  margin-bottom: 2rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+input {
+  width: 60px;
+  margin-left: 0.5rem;
+}
+
+.plato {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+button {
+  margin-left: 1rem;
+  padding: 0.3rem 0.8rem;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1d4ed8;
+}
