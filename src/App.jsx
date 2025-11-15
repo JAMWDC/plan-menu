@@ -43,11 +43,17 @@ const MENU_OPCIONES = {
 
 const DIAS = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 const CATEGORIAS = ['entrantes', 'platosPrincipales', 'acompanamientos'];
+// Nueva constante para diferenciar Comida y Cena
+const MOMENTOS = ['Almuerzo', 'Cena']; 
 
+// La estructura inicial del menú ahora incluye Almuerzo y Cena
 const initialMenuState = DIAS.reduce((acc, dia) => {
-  acc[dia] = CATEGORIAS.reduce((dayAcc, cat) => {
-    dayAcc[cat] = '';
-    return dayAcc;
+  acc[dia] = MOMENTOS.reduce((momentAcc, momento) => {
+    momentAcc[momento] = CATEGORIAS.reduce((catAcc, cat) => {
+      catAcc[cat] = '';
+      return catAcc;
+    }, {});
+    return momentAcc;
   }, {});
   return acc;
 }, {});
@@ -56,12 +62,16 @@ function App() {
   const [menu, setMenu] = useState(initialMenuState);
   const [comensales, setComensales] = useState(4);
 
-  const handleMenuChange = (dia, categoria, plato) => {
+  // Función de cambio ahora recibe el día, el momento (Almuerzo/Cena) y la categoría
+  const handleMenuChange = (dia, momento, categoria, plato) => {
     setMenu(prevMenu => ({
       ...prevMenu,
       [dia]: {
         ...prevMenu[dia],
-        [categoria]: plato,
+        [momento]: {
+          ...prevMenu[dia][momento],
+          [categoria]: plato,
+        }
       },
     }));
   };
@@ -70,22 +80,26 @@ function App() {
     const totales = {};
 
     Object.values(menu).forEach(diaMenu => {
-      CATEGORIAS.forEach(categoria => {
-        const platoNombre = diaMenu[categoria];
-        if (!platoNombre) return;
+      // Iterar sobre Almuerzo y Cena
+      MOMENTOS.forEach(momento => { 
+        CATEGORIAS.forEach(categoria => {
+          // Acceder a menu[dia][momento][categoria]
+          const platoNombre = diaMenu[momento][categoria]; 
+          if (!platoNombre) return;
 
-        const plato = MENU_OPCIONES[categoria].find(p => p.nombre === platoNombre);
-        if (!plato || !plato.qty) return;
+          const plato = MENU_OPCIONES[categoria].find(p => p.nombre === platoNombre);
+          if (!plato || !plato.qty) return;
 
-        const match = plato.qty.match(/(\d+\.?\d*)\s*([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)/);
-        if (!match) return;
+          const match = plato.qty.match(/(\d+\.?\d*)\s*([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)/);
+          if (!match) return;
 
-        const cantidadBase = parseFloat(match[1]);
-        const unidad = match[2];
-        const claveUnica = `${plato.nombre} (${unidad})`;
-        const cantidadTotal = cantidadBase * comensales;
+          const cantidadBase = parseFloat(match[1]);
+          const unidad = match[2];
+          const claveUnica = `${plato.nombre} (${unidad})`;
+          const cantidadTotal = cantidadBase * comensales;
 
-        totales[claveUnica] = (totales[claveUnica] || 0) + cantidadTotal;
+          totales[claveUnica] = (totales[claveUnica] || 0) + cantidadTotal;
+        });
       });
     });
 
@@ -134,37 +148,53 @@ function App() {
           <h2 className={headerClasses}>Elige tu Menú Semanal</h2>
           <button
             onClick={() => setMenu(initialMenuState)}
-            className="px-4 py-1 bg-red-500 text-white font-medium rounded-full text-sm"
+            className="px-4 py-1 bg-red-500 text-white font-medium rounded-full text-sm hover:bg-red-600 transition duration-150"
           >
             Reiniciar Todo
           </button>
         </div>
 
         {DIAS.map(dia => (
-          <div key={dia} className="border-b p-4 mb-4">
+          <div key={dia} className="border-b border-gray-200 p-4 mb-4">
             <h3 className={subHeaderClasses}>{dia}</h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-3">
-              {CATEGORIAS.map(cat => (
-                <div key={cat}>
-                  <label className="capitalize text-sm font-semibold text-gray-700 mb-1">
-                    {cat === 'platosPrincipales' ? 'Plato Principal' : cat.replace(/s$/, '')}:
-                  </label>
-                  <select
-                    className={selectClasses}
-                    value={menu[dia][cat]}
-                    onChange={(e) => handleMenuChange(dia, cat, e.target.value)}
-                  >
-                    <option value="">-- seleccionar --</option>
-                    {MENU_OPCIONES[cat].map(plato => (
-                      <option key={plato.nombre} value={plato.nombre}>
-                        {plato.nombre} ({plato.qty})
-                      </option>
+            {/* Iterar sobre Almuerzo y Cena */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4">
+              {MOMENTOS.map(momento => (
+                <div key={momento} className="bg-gray-50 p-4 rounded-xl shadow-inner border border-gray-200">
+                  <h4 className="text-lg font-bold text-gray-800 mb-4 border-b pb-2 border-gray-300">
+                    {momento}
+                  </h4>
+                  
+                  {/* Categorías dentro del Momento (Almuerzo/Cena) */}
+                  <div className="grid grid-cols-1 gap-6">
+                    {CATEGORIAS.map(cat => (
+                      <div key={cat}>
+                        <label className="capitalize text-sm font-semibold text-gray-700 mb-1">
+                          {cat === 'platosPrincipales' ? 'Plato Principal' : cat.replace(/s$/, '')}:
+                        </label>
+                        <select
+                          className={selectClasses}
+                          // Ahora usamos menu[dia][momento][cat]
+                          value={menu[dia][momento][cat]} 
+                          // Ahora pasamos el momento a handleMenuChange
+                          onChange={(e) => handleMenuChange(dia, momento, cat, e.target.value)} 
+                        >
+                          <option value="">-- seleccionar --</option>
+                          {MENU_OPCIONES[cat].map(plato => (
+                            <option key={plato.nombre} value={plato.nombre}>
+                              {plato.nombre} ({plato.qty})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     ))}
-                  </select>
+                  </div>
                 </div>
               ))}
             </div>
+            {/* Fin de Iteración sobre Almuerzo y Cena */}
+
           </div>
         ))}
       </div>
@@ -211,4 +241,3 @@ function App() {
 }
 
 export default App;
-
