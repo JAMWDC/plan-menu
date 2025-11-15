@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-
+// Mejoras de Comida y Cena implementadas.
 // Opciones de menú con cantidades razonables por comensal (ajustables)
 const MENU_OPCIONES = {
   entrantes: [
