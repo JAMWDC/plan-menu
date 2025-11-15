@@ -3,7 +3,14 @@ name: Build and Deploy to GH Pages
 on:
   push:
     branches:
-      - master # Usa 'master' o 'main', según tu rama principal
+      - master
+
+# AÑADIR ESTA SECCIÓN DE PERMISOS:
+permissions:
+  contents: write 
+  pages: write
+  id-token: write
+# FIN DE LA SECCIÓN DE PERMISOS
 
 jobs:
   build-and-deploy:
@@ -24,13 +31,11 @@ jobs:
         run: npm install
 
       - name: Build project (Vite)
-        # Esto ejecuta 'npm run build' que crea tu carpeta 'dist'
         run: npm run build
 
       - name: Deploy to GitHub Pages
-        # Esta es la acción que usa la rama gh-pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist # La carpeta de salida de Vite
-          publish_branch: gh-pages # Despliega a la rama 'gh-pages'
+          publish_dir: ./dist 
+          publish_branch: gh-pages
